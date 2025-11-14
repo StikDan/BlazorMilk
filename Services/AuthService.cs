@@ -20,33 +20,24 @@ public class AuthService
         LinqService = new LinqService(_db);
     }
 
-    public bool HandleClientData(client client)
-    {
-        Random rnd = new();
-        int randonId = rnd.Next(1, 10000);
-
-        string hashPassword = HashService.CalculateHashData(client.password);
-
-        client.idClient = randonId;
-        client.login = client.login;
-        client.password = hashPassword;
-
-        List<client> clientData = new() {client};
-
-        bool result = CheckValidClient(clientData);
-        return result;
-    }
-
-    public bool CheckValidClient(List<client> clientData)
+    public async Task<bool> CheckValidClientAsync(List<client> clientData)
     {
         List<client> dbClients = LinqService.SelectClients();
-        for(int i = 0; i <= dbClients.Count; i++)
+
+        if (clientData == null || clientData.Count == 0)
+            return false;
+
+        client inputClient = clientData[0];
+
+        for (int i = 0; i < dbClients.Count; i++)
         {
-            if(dbClients[i] == clientData[i])
+            if (dbClients[i].login == inputClient.login 
+                && dbClients[i].password == inputClient.password)
             {
-                return true;
+                return await Task.FromResult(true);
             }
         }
-        return false;
+
+        return await Task.FromResult(false);
     }
 }

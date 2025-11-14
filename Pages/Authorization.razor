@@ -5,51 +5,69 @@
 @using BlazorMilk.Data
 @inject ProtectedSessionStorage protectedSessionStorage
 @inject AuthService AuthService
+@inject HashService HashService
 
 <div class="autorize-nodel">
 
-    <h2 class="authorize-title">Authorize please.</h2>
+    <h2 class="authorize-title">Пожалуйста авторизируйтесь.</h2>
 
-    <EditForm Model="@client" OnValidSubmit="() => AuthService.HandleClientData(client)" FormName="AuthorizeForm">
+    <EditForm Model="@client" OnValidSubmit="HandleClientData" FormName="AuthorizeForm">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
-        <label for="login">Login</label>
+        <label for="login">Логин</label>
         <InputText id="login" @bind-Value="client.login"></InputText><br>
-        <label for="password">Password</label>
-        <InputText id="password" @bind-Value="client.password"></InputText>
-        <p></p>
-        <button class="btn btn-success" type="submit" disabled="@isLoading" @onclick="() => isLoading=true">
-            @if(isLoading)
-                { <span>Entering...</span> }
-            else
-                { <span>Enter</span> }
+        <label for="password">Пароль</label>
+        <InputText id="password" type="password" @bind-Value="client.password"></InputText>
+
+        <button class="btn btn-success" id="autorize-button" type="submit" disabled="@isLoading" @onclick="() => EraseMessage()">
+        @if(isLoading)
+            { <span>Вход...</span> }
+        else
+            { <span>Войти</span> }
         </button>
     </EditForm>
+
+    @if (!string.IsNullOrEmpty(authErrorMessage))
+    {
+        <div class="alert alert-danger" id="auth-error">@authErrorMessage</div>
+    }
 </div>
 
 @code {
-    public client client { get; set; } = new();
+    protected client client { get; set; } = new();
 
-    bool isLoading = false;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            isLoading = true;
-            await LoadDataAsync();
-            StateHasChanged();
-        }
-    }
-
-    protected async Task LoadDataAsync()
-    {
-        var result = await protectedSessionStorage.GetAsync<client?>("CurrentUser");
-    }
+    protected string authErrorMessage = "";
+    protected bool isValid = false;
+    protected bool isLoading = false;
 
     protected async Task SendDataAsync()
     {
         await protectedSessionStorage.SetAsync("CurrentUser", client);
+    }
+
+    protected async Task HandleClientData()
+    {
+        isLoading = true;
+
+        string hashPassword = HashService.CalculateHashData(client.password);
+
+        client.idClient = new Random().Next(1, 10000);
+        client.password = hashPassword;
+
+        List<client> clientData = new() { client };
+
+        isValid = await AuthService.CheckValidClientAsync(clientData);
+        isLoading = false;
+
+        if(isValid)
+            await SendDataAsync();
+        else
+            authErrorMessage = "Неправильный логин или пароль!";
+    }
+
+    protected void EraseMessage()
+    {
+        authErrorMessage = "";
     }
 }

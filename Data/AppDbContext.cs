@@ -17,16 +17,16 @@ namespace BlazorMilk.Data
         {
         }
 
-        public virtual DbSet<detailofproductmaterial> detailofproductmaterials { get; set; } = null!;
-        public virtual DbSet<material> materials { get; set; } = null!;
-        public virtual DbSet<orderdetail> orderdetails { get; set; } = null!;
-        public virtual DbSet<ordervendor> ordervendors { get; set; } = null!;
-        public virtual DbSet<product> products { get; set; } = null!;
-        public virtual DbSet<vendor> vendors { get; set; } = null!;
+        public virtual DbSet<detailofproductmaterial> detailofproductmaterial { get; set; } = null!;
+        public virtual DbSet<material> material { get; set; } = null!;
+        public virtual DbSet<orderdetail> orderdetail { get; set; } = null!;
+        public virtual DbSet<ordervendor> ordervendor { get; set; } = null!;
+        public virtual DbSet<product> product { get; set; } = null!;
+        public virtual DbSet<vendor> vendor { get; set; } = null!;
         /*---*/
-        public virtual DbSet<client> clients { get; set; } = null!;
-        public virtual DbSet<vproductscount> vproductscounts { get; set; } = null!;
-        public virtual DbSet<vtotalproduct> vtotalproducts { get; set; } = null!;
+        public virtual DbSet<client> client { get; set; } = null!;
+        public virtual DbSet<vproductscount> vproductscount { get; set; } = null!;
+        public virtual DbSet<vtotalproduct> vtotalproduct { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
