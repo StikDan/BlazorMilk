@@ -1,0 +1,55 @@
+@page "/authorization"
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using BlazorMilk.Models
+@using BlazorMilk.Services
+@using BlazorMilk.Data
+@inject ProtectedSessionStorage protectedSessionStorage
+@inject AuthService AuthService
+
+<div class="autorize-nodel">
+
+    <h2 class="authorize-title">Authorize please.</h2>
+
+    <EditForm Model="@client" OnValidSubmit="() => AuthService.HandleClientData(client)" FormName="AuthorizeForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <label for="login">Login</label>
+        <InputText id="login" @bind-Value="client.login"></InputText><br>
+        <label for="password">Password</label>
+        <InputText id="password" @bind-Value="client.password"></InputText>
+        <p></p>
+        <button class="btn btn-success" type="submit" disabled="@isLoading" @onclick="() => isLoading=true">
+            @if(isLoading)
+                { <span>Entering...</span> }
+            else
+                { <span>Enter</span> }
+        </button>
+    </EditForm>
+</div>
+
+@code {
+    public client client { get; set; } = new();
+
+    bool isLoading = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isLoading = true;
+            await LoadDataAsync();
+            StateHasChanged();
+        }
+    }
+
+    protected async Task LoadDataAsync()
+    {
+        var result = await protectedSessionStorage.GetAsync<client?>("CurrentUser");
+    }
+
+    protected async Task SendDataAsync()
+    {
+        await protectedSessionStorage.SetAsync("CurrentUser", client);
+    }
+}
